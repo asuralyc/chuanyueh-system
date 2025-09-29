@@ -151,14 +151,16 @@ CREATE TABLE user_roles (
 -- 員工表
 CREATE TABLE employees (
   id VARCHAR(36) PRIMARY KEY,
-  user_id VARCHAR(36) NOT NULL,
+  user_id VARCHAR(36) UNIQUE NOT NULL,
   branch_id VARCHAR(36) NOT NULL,
   employee_number VARCHAR(20) UNIQUE NOT NULL,
   name VARCHAR(50) NOT NULL,
   title VARCHAR(50),
   phone VARCHAR(20),
-  hire_date DATE,
+  hire_date DATE NULL,
   status ENUM('active', 'inactive', 'resigned') DEFAULT 'active',
+  resignation_date DATE NULL,
+  resignation_reason TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
