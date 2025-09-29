@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enums ---
+
+enum Status {
+  active
+  inactive
+}
+
+
+enum UserStatus {
+  active
+  inactive
+  suspended
+}
+
+enum EmployeeStatus {
+  active
+  inactive
+  resigned
+}
+
+enum MemberStatus {
+  active
+  inactive
+  suspended
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+// --- Models ---
+
+model Branch {
+  id        String      @id @default(cuid())
+  name      String
+  code      String      @unique
+  address   String?
+  phone     String?
+  status    Status      @default(active)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  userRoles UserRole[]
+  employees Employee[]
+  members   Member[]    @relation("HomeBranchMembers")
+  serviceRecords ServiceRecord[]
+
+  @@map("branches")
+}
+
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  passwordHash String   @map("password_hash")
+  status    UserStatus  @default(active)
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  roles     UserRole[]
+  employee  Employee?   // A user might not be an employee
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  permissions Json?    // JSON field for permissions list
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  branchId  String?  @map("branch_id") // Nullable for global roles
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@unique([userId, roleId, branchId], name: "unique_user_role_branch")
+  @@map("user_roles")
+}
+
+model Employee {
+  id            String         @id @default(cuid())
+  userId        String         @unique @map("user_id")
+  branchId      String         @map("branch_id")
+  employeeNumber String        @unique @map("employee_number")
+  name          String
+  title         String?
+  phone         String?
+  hireDate      DateTime?      @db.Date @map("hire_date")
+  status        EmployeeStatus @default(active)
+  resignationDate DateTime?    @db.Date @map("resignation_date")
+  resignationReason String?    @db.Text @map("resignation_reason")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  branch  Branch  @relation(fields: [branchId], references: [id])
+  serviceRecords ServiceRecord[]
+
+  @@map("employees")
+}
+
+model Member {
+  id            String       @id @default(cuid())
+  memberNumber  String       @unique @map("member_number")
+  name          String
+  phone         String?
+  email         String?
+  homeBranchId  String       @map("home_branch_id")
+  birthDate     DateTime?    @db.Date @map("birth_date")
+  gender        Gender?
+  status        MemberStatus @default(active)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  homeBranch    Branch   @relation("HomeBranchMembers", fields: [homeBranchId], references: [id])
+  serviceRecords ServiceRecord[]
+
+  @@index([phone])
+  @@index([email])
+  @@index([memberNumber])
+  @@map("members")
+}
+
+model ServiceRecord {
+  id          String   @id @default(cuid())
+  memberId    String   @map("member_id")
+  branchId    String   @map("branch_id")
+  employeeId  String   @map("employee_id")
+  serviceType String   @map("service_type")
+  serviceDescription String? @db.Text @map("service_description")
+  amount      Decimal? @db.Decimal(10, 2)
+  serviceDate DateTime @default(now()) @map("service_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  member   Member   @relation(fields: [memberId], references: [id])
+  branch   Branch   @relation(fields: [branchId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("service_records")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorUserId String  @map("actor_user_id")
+  action     String
+  entity     String
+  entityId   String?  @map("entity_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @db.Text @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  actor User @relation(fields: [actorUserId], references: [id])
+
+  @@index([actorUserId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
