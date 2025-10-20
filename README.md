@@ -136,6 +136,55 @@ src/
 └── types/                   # TypeScript 型別定義
 ```
 
+## 生產環境部署注意事項
+
+⚠️ **重要安全提醒**
+
+本專案的 `.env` 檔案已提交到 Git 作為**開發環境範本**，包含預設的開發用設定值。
+
+**部署到生產環境前，請務必修改以下設定：**
+
+### 後端 (store-management-api/.env)
+
+1. **資料庫連線字串** - 更新為生產環境的資料庫
+   ```env
+   DATABASE_URL="mysql://生產環境使用者:強密碼@生產環境主機:3306/資料庫名稱"
+   ```
+
+2. **JWT Secret** - 使用強隨機密鑰（至少 256 bits）
+   ```bash
+   # 生成安全的 JWT secret
+   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+   ```
+   將生成的密鑰複製到 .env：
+   ```env
+   JWT_SECRET="生成的隨機密鑰"
+   ```
+
+3. **環境變數**
+   ```env
+   NODE_ENV="production"
+   PORT=3001
+   ```
+
+### 前端 (store-management-client/.env)
+
+更新 API 基礎 URL 為生產環境的後端地址：
+```env
+VITE_API_BASE_URL=https://your-production-api.com/api/v1
+```
+
+### 建議做法
+
+為了更安全的生產環境部署，建議：
+
+1. 複製 `.env` 為 `.env.production`
+2. 在 `.env.production` 中填入生產環境設定
+3. `.env.production` 不會被提交到 Git（已在 .gitignore 中排除）
+4. 部署時使用環境變數或秘密管理服務
+
+---
+
 ## 貢獻指南
 
 我們歡迎任何形式的貢獻！請參考以下的 Git 工作流程與 Commit 訊息規範。

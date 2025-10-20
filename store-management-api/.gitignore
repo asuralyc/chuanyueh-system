@@ -2,6 +2,10 @@
 /dist
 /node_modules
 /build
+*.tsbuildinfo
+prisma/**/*.js
+prisma/**/*.js.map
+prisma/**/*.d.ts
 
 # Logs
 logs
@@ -35,12 +39,13 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# dotenv environment variable files
-.env
+# dotenv environment variable files (excluding .env which is committed as template)
+# .env - Committed to Git as development template
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
+.env.production  # Production environment file should NOT be committed
 
 # temp directory
 .temp

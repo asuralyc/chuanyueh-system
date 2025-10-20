@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (excluding .env which is committed as template)
+# .env - Committed to Git as development template
+.env.local
+.env.*.local
+.env.production  # Production environment file should NOT be committed
+
+# TypeScript compiled files (should not be committed)
+src/**/*.js
+src/**/*.js.map
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

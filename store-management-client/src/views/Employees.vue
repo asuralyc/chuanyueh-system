@@ -157,7 +157,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { Search, Plus } from '@element-plus/icons-vue';
 import { employeesApi, branchesApi, type Employee, type QueryEmployeeDto, type Branch, type ResignEmployeeDto } from '../api/employees';
 
@@ -293,30 +293,6 @@ const confirmResignation = async () => {
   } catch (error: any) {
     console.error('設定員工離職失敗:', error);
     ElMessage.error(error.response?.data?.message || '設定員工離職失敗');
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleDelete = async (row: Employee) => {
-  // 舊的直接離職方法，可以保留作為後備
-  try {
-    await ElMessageBox.confirm(`您確定要將員工「${row.name}」設為離職狀態嗎？`, '警告', {
-      confirmButtonText: '確定離職',
-      cancelButtonText: '取消',
-      type: 'warning',
-    });
-
-    loading.value = true;
-    await employeesApi.deleteEmployee(row.id);
-    ElMessage.success(`員工 ${row.name} 已設為離職狀態`);
-
-    await loadEmployees();
-  } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('設定員工離職失敗:', error);
-      ElMessage.error(error.response?.data?.message || '設定員工離職失敗');
-    }
   } finally {
     loading.value = false;
   }

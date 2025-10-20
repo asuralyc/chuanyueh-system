@@ -1,7 +1,6 @@
 import { useAuthStore } from '../store/auth'
 import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:3001/api/v1'
+import { API_BASE_URL } from '../config/api'
 
 // 配置 axios 實例
 const api = axios.create({
