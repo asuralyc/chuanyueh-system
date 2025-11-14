@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '../store/auth';
 import MainLayout from '../layout/MainLayout.vue';
 import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
